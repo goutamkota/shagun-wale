@@ -8,17 +8,17 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  createDate  DateTime  @default(now())
-  updateDate  DateTime  @updatedAt()
-  isAdmin     Boolean   @default(false)
-  email       String    @unique()
-  phoneNumber String    @unique()
+  id          String   @id @default(uuid())
+  createDate  DateTime @default(now())
+  updateDate  DateTime @updatedAt()
+  isAdmin     Boolean  @default(false)
+  email       String   @unique()
+  phoneNumber String   @unique()
   firstName   String
   middleName  String?
   lastName    String
   password    String
-  bookings    Booking[]
+  orders      Order[]
 }
 
 enum CategoryType {
@@ -28,21 +28,29 @@ enum CategoryType {
   CUSTOM
 }
 
-model Booking {
-  id          Int          @id @default(autoincrement())
-  type        CategoryType
-  price       Int?
-  description String?
-  boxCount    Int?
-  products    Product[]
-  user_id     String
-  user        User         @relation(fields: [user_id], references: [id])
+model Order {
+  id       Int      @id @default(autoincrement())
+  item_id  Int
+  quantity Int
+  total    Float
+  user_id  String
+  user     User     @relation(fields: [user_id], references: [id])
+  item     MenuItem @relation(fields: [item_id], references: [id])
 }
 
-model Product {
-  id         Int     @id @default(autoincrement())
-  name       String
-  count      Int
-  booking_id Int
-  booking    Booking @relation(fields: [booking_id], references: [id])
+model MenuItem {
+  id            Int          @id @default(autoincrement())
+  name          String
+  category_type CategoryType
+  price         Float
+  items         Item[]
+  order         Order[]
+}
+
+model Item {
+  id            Int      @id @default(autoincrement())
+  item_name     String
+  item_quantity Int
+  menu_item     MenuItem @relation(fields: [menu_item_id], references: [id])
+  menu_item_id  Int
 }
