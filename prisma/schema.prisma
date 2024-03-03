@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  createDate  DateTime @default(now())
-  updateDate  DateTime @updatedAt()
-  isAdmin     Boolean  @default(false)
-  email       String   @unique()
-  phoneNumber String   @unique()
+  id          String    @id @default(uuid())
+  createDate  DateTime  @default(now())
+  updateDate  DateTime  @updatedAt()
+  isAdmin     Boolean   @default(false)
+  email       String    @unique()
+  phoneNumber String    @unique()
   firstName   String
   middleName  String?
   lastName    String
   password    String
+  bookings    Booking[]
 }
 
 enum CategoryType {
@@ -27,19 +28,21 @@ enum CategoryType {
   CUSTOM
 }
 
-model Category {
+model Booking {
   id          Int          @id @default(autoincrement())
   type        CategoryType
-  price       Int
-  description String
-  boxCount    Int
+  price       Int?
+  description String?
+  boxCount    Int?
   products    Product[]
+  user_id     String
+  user        User         @relation(fields: [user_id], references: [id])
 }
 
 model Product {
-  id         Int      @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   name       String
   count      Int
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  booking_id Int
+  booking    Booking @relation(fields: [booking_id], references: [id])
 }
