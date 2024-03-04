@@ -27,9 +27,10 @@ export class MenuController {
   async updateMenuItem(
     @Param('id') id: number,
     @Body() { name, category_type, price, items }: any,
-  ): Promise<MenuItem> {
+  ): Promise<any> {
     return this.menuService.updateMenuItem(id, name, category_type, price, items);
   }
+
 
   @Delete(':id')
   async deleteMenuItem(@Param('id') id: number): Promise<void> {

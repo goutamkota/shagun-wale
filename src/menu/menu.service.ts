@@ -11,7 +11,6 @@ export class MenuService {
     return this.prisma.menuItem.findMany({
       include: {
         items: true,
-        // order: true,
       },
     });
   }
@@ -56,6 +55,7 @@ export class MenuService {
     };
   }
 
+
   async updateMenuItem(id: number, name: string, category_type: CategoryType, price: number, items: {
     item_name: string;
     item_quantity: number
@@ -68,20 +68,12 @@ export class MenuService {
     if (!existingMenuItem) {
       throw new NotFoundException(`Menu Item with ID ${id} not found.`);
     }
-
     const updatedMenuItem = await this.prisma.menuItem.update({
       where: { id },
       data: {
         category_type,
         name,
         price,
-        items: {
-          upsert: items.map(item => ({
-            where: { id: existingMenuItem.items.find(existingItem => existingItem.item_name === item.item_name)?.id },
-            update: { item_name: item.item_name, item_quantity: item.item_quantity },
-            create: { ...item, menu_item_id: id },
-          })) as any,
-        },
       },
     });
 
