@@ -9,7 +9,7 @@ export class MenuController {
   }
 
   @Get()
-  async getAllMenuItems(): Promise<MenuItem[]> {
+  async getAllMenuItems(): Promise<any> {
     return this.menuService.getAllMenuItems();
   }
 
@@ -33,7 +33,7 @@ export class MenuController {
 
 
   @Delete(':id')
-  async deleteMenuItem(@Param('id') id: number): Promise<void> {
+  async deleteMenuItem(@Param('id') id: number): Promise<any> {
     return this.menuService.deleteMenuItem(id);
   }
 }
