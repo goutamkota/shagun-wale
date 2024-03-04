@@ -31,7 +31,6 @@ export class MenuController {
     return this.menuService.updateMenuItem(id, name, category_type, price, items);
   }
 
-
   @Delete(':id')
   async deleteMenuItem(@Param('id') id: number): Promise<any> {
     return this.menuService.deleteMenuItem(id);

@@ -34,11 +34,11 @@ export class MenuService {
   async createMenuItem(name: string, categoryType: CategoryType, price: number, items: {
     item_name: string;
     item_quantity: number
-  }[] = []): Promise<any> {
+  }[] = []) {
 
     const toCheckDuplicates = await this.getAllMenuItems();
 
-    if (toCheckDuplicates.some((pack:any) => pack.category_type === categoryType)) {
+    if (toCheckDuplicates.some((pack: any) => pack.category_type === categoryType)) {
       throw new ConflictException(`Package with category type '${categoryType}' already exists.`);
     }
 
@@ -68,7 +68,7 @@ export class MenuService {
   async updateMenuItem(id: number, name: string, category_type: CategoryType, price: number, items: {
     item_name: string;
     item_quantity: number
-  }[] = []): Promise<any> {
+  }[] = []) {
     const existingMenuItem = await this.prisma.menuItem.findUnique({
       where: { id },
       include: { items: true },
@@ -144,7 +144,7 @@ export class MenuService {
     };
   }
 
-  async deleteMenuItem(id: number): Promise<any> {
+  async deleteMenuItem(id: number) {
     const existingMenuItem = await this.prisma.menuItem.findUnique({
       where: { id },
       include: { items: true },
@@ -155,9 +155,11 @@ export class MenuService {
     }
 
     // Delete associated items first
-    await this.prisma.item.deleteMany({
-      where: { menu_item_id: id },
-    });
+    if (existingMenuItem.items) {
+      await this.prisma.item.deleteMany({
+        where: { menu_item_id: id },
+      });
+    }
 
     // Now, delete the menu item
     const deletedMenuItem = await this.prisma.menuItem.delete({
