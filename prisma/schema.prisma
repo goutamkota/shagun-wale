@@ -29,13 +29,17 @@ enum CategoryType {
 }
 
 model Order {
-  id       Int      @id @default(autoincrement())
-  item_id  Int
-  quantity Int
-  total    Float
-  user_id  String
-  user     User     @relation(fields: [user_id], references: [id])
-  item     MenuItem @relation(fields: [item_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  quantity    Int      @default(1)
+  total       Float
+  discount    Float
+  grand_total Float
+  createDate  DateTime @default(now())
+  updateDate  DateTime @updatedAt()
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  item_id     Int
+  item        MenuItem @relation(fields: [item_id], references: [id])
 }
 
 model MenuItem {
