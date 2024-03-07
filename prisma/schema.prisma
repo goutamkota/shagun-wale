@@ -20,6 +20,7 @@ model User {
   password      String
   orders        Order[]
   custom_orders CustomOrder[]
+  profile_pic   String?
 }
 
 enum CategoryType {
@@ -54,8 +55,8 @@ model MenuItem {
 
 model ItemForMenu {
   id           Int      @id @default(autoincrement())
-  item_id      String
-  quantity     Int
+  item_id      Int
+  quantity     Float
   menu_item_id Int
   menu_item    MenuItem @relation(fields: [menu_item_id], references: [id])
 }
@@ -85,18 +86,21 @@ model CustomMenuItem {
 
 model ItemForCustomMenu {
   id                  Int            @id @default(autoincrement())
-  item_id             String
-  quantity            Int
+  item_id             Int
+  quantity            Float
   custom_menu_item_id Int
   custom_menu_item    CustomMenuItem @relation(fields: [custom_menu_item_id], references: [id])
 }
 
 model ItemList {
-  id         Int      @id @default(autoincrement())
-  item_name  String
-  item_price Float
-  createDate DateTime @default(now())
-  updateDate DateTime @updatedAt()
-  shelf_life Float?
-  item_image String?
+  id            Int      @id @default(autoincrement())
+  item_name     String   @unique
+  item_price    Float
+  item_quantity Float
+  s_i_unit      String
+  createDate    DateTime @default(now())
+  updateDate    DateTime @updatedAt()
+  shelf_life    Float?
+  item_image    String?
+  in_stock      Boolean  @default(false)
 }
