@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { OrderDto } from "./dtos/orderDto.dto";
 import { AppService } from "../app.service";
 import { CategoryType, MenuItem, Order } from "@prisma/client";
-import { MenuService } from "../menu/menu.service";
 import * as process from "process";
+import { CreatePackageService } from "../menu/create-package/create-package.service";
 
 @Injectable()
 export class OrderService {
@@ -16,7 +16,7 @@ export class OrderService {
     ]
   );
 
-  constructor(private readonly prisma: AppService, private menuService: MenuService) {
+  constructor(private readonly prisma: AppService, private packageService: CreatePackageService) {
   }
 
   async getAllOrders() {

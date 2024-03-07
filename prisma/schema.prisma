@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  createDate  DateTime @default(now())
-  updateDate  DateTime @updatedAt()
-  isAdmin     Boolean  @default(false)
-  email       String   @unique()
-  phoneNumber String   @unique()
-  firstName   String
-  middleName  String?
-  lastName    String
-  password    String
-  orders      Order[]
+  id            String        @id @default(uuid())
+  createDate    DateTime      @default(now())
+  updateDate    DateTime      @updatedAt()
+  isAdmin       Boolean       @default(false)
+  email         String        @unique()
+  phoneNumber   String        @unique()
+  firstName     String
+  middleName    String?
+  lastName      String
+  password      String
+  orders        Order[]
+  custom_orders CustomOrder[]
 }
 
 enum CategoryType {
@@ -30,7 +31,7 @@ enum CategoryType {
 
 model Order {
   id          Int      @id @default(autoincrement())
-  quantity    Int      @default(1)
+  quantity    Int?     @default(1)
   total       Float
   discount    Float
   grand_total Float
@@ -43,18 +44,59 @@ model Order {
 }
 
 model MenuItem {
-  id            Int          @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   name          String
   category_type CategoryType
   price         Float
-  items         Item[]
+  items         ItemForMenu[]
   order         Order[]
 }
 
-model Item {
-  id            Int      @id @default(autoincrement())
-  item_name     String
-  item_quantity Int
-  menu_item     MenuItem @relation(fields: [menu_item_id], references: [id])
-  menu_item_id  Int
+model ItemForMenu {
+  id           Int      @id @default(autoincrement())
+  item_id      String
+  quantity     Int
+  menu_item_id Int
+  menu_item    MenuItem @relation(fields: [menu_item_id], references: [id])
+}
+
+model CustomOrder {
+  id             Int            @id @default(autoincrement())
+  quantity       Int?           @default(1)
+  total          Float
+  discount       Float
+  grand_total    Float
+  createDate     DateTime       @default(now())
+  updateDate     DateTime       @updatedAt()
+  user_id        String
+  user           User           @relation(fields: [user_id], references: [id])
+  custom_item_id Int
+  custom_item    CustomMenuItem @relation(fields: [custom_item_id], references: [id])
+}
+
+model CustomMenuItem {
+  id            Int                 @id @default(autoincrement())
+  name          String
+  category_type CategoryType
+  price         Float
+  items         ItemForCustomMenu[]
+  custom_order  CustomOrder[]
+}
+
+model ItemForCustomMenu {
+  id                  Int            @id @default(autoincrement())
+  item_id             String
+  quantity            Int
+  custom_menu_item_id Int
+  custom_menu_item    CustomMenuItem @relation(fields: [custom_menu_item_id], references: [id])
+}
+
+model ItemList {
+  id         Int      @id @default(autoincrement())
+  item_name  String
+  item_price Float
+  createDate DateTime @default(now())
+  updateDate DateTime @updatedAt()
+  shelf_life Float?
+  item_image String?
 }

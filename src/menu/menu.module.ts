@@ -1,12 +1,16 @@
-import { Module } from '@nestjs/common';
-import { MenuController } from './menu.controller';
-import { MenuService } from './menu.service';
-import { AppService } from '../app.service';
+import { Module } from "@nestjs/common";
+import { AppService } from "../app.service";
+import { UploadItemController } from "./upload-item/upload-item.controller";
+import { UploadItemService } from "./upload-item/upload-item.service";
+import { CreatePackageService } from "./create-package/create-package.service";
+import { CreatePackageController } from "./create-package/create-package.controller";
+import { CustomPackageController } from "./custom-package/custom-package.controller";
+import { CustomPackageService } from "./custom-package/custom-package.service";
 
 @Module({
-  providers: [MenuService, AppService],
-  controllers: [MenuController],
-  exports: [MenuService]
+  providers: [AppService, UploadItemService, CreatePackageService, CustomPackageService],
+  controllers: [UploadItemController, CreatePackageController, CustomPackageController],
+  exports: [CreatePackageService]
 })
 export class MenuModule {
 }
