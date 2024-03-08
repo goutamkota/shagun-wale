@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UploadItemDto {
 
@@ -24,5 +24,13 @@ export class UploadItemDto {
   @IsOptional()
   @IsString()
   item_image?: string;
+
+}
+
+
+export class DeleteDto {
+
+  @IsArray()
+  toDeleteList: (string | number)[] | undefined;
 
 }
