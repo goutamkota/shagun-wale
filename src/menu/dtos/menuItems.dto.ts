@@ -1,14 +1,45 @@
 import { CategoryType } from '@prisma/client';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 
-export class MenuItemDto {
+export class CreateMenuDto {
+
+  @IsString()
   name: string;
-  category_type: CategoryType
-  price: number;
-  items?: ItemDto[];
+
+  @IsEnum(CategoryType)
+  category_type: CategoryType;
+
+  @IsArray()
+  items: ItemDto[];
+
+}
+
+export class UpdateMenuDto {
+
+  @IsOptional()
+  @IsNumber()
+  id: number;
+
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsEnum(CategoryType)
+  category_type: CategoryType;
+
+  @IsArray()
+  items: ItemDto[];
+
 }
 
 export class ItemDto {
-  item_name: string;
-  item_quantity: number;
+
+  @IsNumber()
+  item_id: number;
+
+  @IsNumber()
+  quantity: number;
+
 }

@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { OrderDto } from "./dtos/orderDto.dto";
 import { AppService } from "../app.service";
-import { CategoryType, MenuItem, Order } from "@prisma/client";
+import { CategoryType, Order } from "@prisma/client";
 import * as process from "process";
 import { CreatePackageService } from "../menu/create-package/create-package.service";
 
@@ -47,7 +47,7 @@ export class OrderService {
   async createOrder(orderDto: OrderDto) {
     const { user_id, item_id, quantity, ...rest } = orderDto;
     // const menuItem = await this.menuService.getMenuItem(orderDto.item_id);
-    const menuItem = await this.prisma.menuItem.findFirst({
+    const menuItem = await this.prisma.menu.findFirst({
       where: { id: item_id },
       include: {
         items: true

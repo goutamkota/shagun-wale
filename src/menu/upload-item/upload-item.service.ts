@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ItemList } from "@prisma/client";
 import { AppService } from "../../app.service";
-import { UploadItemDto } from "./dtos/upload_item.dto";
+import { UploadItemDto } from "../dtos/uploadItem.dto";
 
 @Injectable()
 export class UploadItemService {

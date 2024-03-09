@@ -41,10 +41,10 @@ model Order {
   user_id     String
   user        User     @relation(fields: [user_id], references: [id])
   item_id     Int
-  item        MenuItem @relation(fields: [item_id], references: [id])
+  item        Menu     @relation(fields: [item_id], references: [id])
 }
 
-model MenuItem {
+model Menu {
   id            Int           @id @default(autoincrement())
   name          String
   category_type CategoryType
@@ -54,28 +54,29 @@ model MenuItem {
 }
 
 model ItemForMenu {
-  id           Int      @id @default(autoincrement())
-  item_id      Int
-  quantity     Float
-  menu_item_id Int
-  menu_item    MenuItem @relation(fields: [menu_item_id], references: [id])
+  id            Int   @id @default(autoincrement())
+  item_id       Int
+  quantity      Float
+  itm_qty_price Float
+  menu_id       Int
+  menu          Menu  @relation(fields: [menu_id], references: [id])
 }
 
 model CustomOrder {
-  id             Int            @id @default(autoincrement())
-  quantity       Int?           @default(1)
+  id             Int        @id @default(autoincrement())
+  quantity       Int?       @default(1)
   total          Float
   discount       Float
   grand_total    Float
-  createDate     DateTime       @default(now())
-  updateDate     DateTime       @updatedAt()
+  createDate     DateTime   @default(now())
+  updateDate     DateTime   @updatedAt()
   user_id        String
-  user           User           @relation(fields: [user_id], references: [id])
+  user           User       @relation(fields: [user_id], references: [id])
   custom_item_id Int
-  custom_item    CustomMenuItem @relation(fields: [custom_item_id], references: [id])
+  custom_item    CustomMenu @relation(fields: [custom_item_id], references: [id])
 }
 
-model CustomMenuItem {
+model CustomMenu {
   id            Int                 @id @default(autoincrement())
   name          String
   category_type CategoryType
@@ -85,11 +86,12 @@ model CustomMenuItem {
 }
 
 model ItemForCustomMenu {
-  id                  Int            @id @default(autoincrement())
-  item_id             Int
-  quantity            Float
-  custom_menu_item_id Int
-  custom_menu_item    CustomMenuItem @relation(fields: [custom_menu_item_id], references: [id])
+  id             Int        @id @default(autoincrement())
+  item_id        Int
+  quantity       Float
+  itm_qty_price  Float
+  custom_menu_id Int
+  custom_menu    CustomMenu @relation(fields: [custom_menu_id], references: [id])
 }
 
 model ItemList {

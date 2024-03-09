@@ -8,7 +8,7 @@ import {
   Query
 } from "@nestjs/common";
 import { UploadItemService } from "./upload-item.service";
-import { DeleteDto, UploadItemDto } from "./dtos/upload_item.dto";
+import { DeleteDto, UploadItemDto } from "../dtos/uploadItem.dto";
 
 @Controller("item")
 export class UploadItemController {
