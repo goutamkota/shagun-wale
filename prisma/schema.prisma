@@ -31,17 +31,23 @@ enum CategoryType {
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  quantity    Int?     @default(1)
-  total       Float
-  discount    Float
-  grand_total Float
-  createDate  DateTime @default(now())
-  updateDate  DateTime @updatedAt()
-  user_id     String
-  user        User     @relation(fields: [user_id], references: [id])
-  item_id     Int
-  item        Menu     @relation(fields: [item_id], references: [id])
+  id               Int         @id @default(autoincrement())
+  quantity         Int?        @default(1)
+  total            Float
+  discount         Float
+  grand_total      Float
+  paid             Boolean     @default(false)
+  status           OrderStatus @default(PENDING)
+  createDate       DateTime    @default(now())
+  updateDate       DateTime    @updatedAt()
+  user_id          String
+  user             User        @relation(fields: [user_id], references: [id])
+  item_id          Int
+  item             Menu        @relation(fields: [item_id], references: [id])
+  shipping_address String?
+  tracking_number  String?
+  customer_notes   String?
+  payment_method   Payment?
 }
 
 model Menu {
@@ -63,17 +69,23 @@ model ItemForMenu {
 }
 
 model CustomOrder {
-  id             Int        @id @default(autoincrement())
-  quantity       Int?       @default(1)
-  total          Float
-  discount       Float
-  grand_total    Float
-  createDate     DateTime   @default(now())
-  updateDate     DateTime   @updatedAt()
-  user_id        String
-  user           User       @relation(fields: [user_id], references: [id])
-  custom_item_id Int
-  custom_item    CustomMenu @relation(fields: [custom_item_id], references: [id])
+  id               Int         @id @default(autoincrement())
+  quantity         Int?        @default(1)
+  total            Float
+  discount         Float
+  grand_total      Float
+  paid             Boolean
+  status           OrderStatus @default(PENDING)
+  createDate       DateTime    @default(now())
+  updateDate       DateTime    @updatedAt()
+  user_id          String
+  user             User        @relation(fields: [user_id], references: [id])
+  custom_item_id   Int
+  custom_item      CustomMenu  @relation(fields: [custom_item_id], references: [id])
+  shipping_address String?
+  tracking_number  String?
+  customer_notes   String?
+  payment_method   Payment?
 }
 
 model CustomMenu {
@@ -105,4 +117,25 @@ model ItemList {
   shelf_life    Float?
   item_image    String?
   in_stock      Boolean  @default(false)
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  SHIPPED
+  DELIVERED
+  RETURN_REQUESTED
+  RETURN_COMPLETED
+  REFUNDED
+}
+
+enum Payment {
+  UPI
+  BANK
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  OTHER
 }
