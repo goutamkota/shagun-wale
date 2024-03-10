@@ -32,7 +32,7 @@ export class CreatePackageController {
 
   @Delete('/delete/:id')
   async deleteMenuItem(@Param('id') id: number): Promise<any> {
-    // return this.packageService.deleteMenuItem(id);
+    return this.packageService.deleteMenuItem(id);
   }
 
 }

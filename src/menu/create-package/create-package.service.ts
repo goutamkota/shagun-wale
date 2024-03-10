@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AppService } from '../../app.service';
-import { ItemList, Menu } from '@prisma/client';
+import { CategoryType, ItemList, Menu } from '@prisma/client';
 import { CreateMenuDto, ItemDto, UpdateMenuDto } from '../dtos/menuItems.dto';
 import * as process from 'process';
 
@@ -108,6 +114,8 @@ export class CreatePackageService {
   async createMenu(request: CreateMenuDto) {
     const { name, category_type, items } = request;
 
+    if (category_type === CategoryType.CUSTOM) throw new UnauthorizedException('Custom Packages are allowed to build by customers only!');
+
     const toCheckDuplicates = await this.getAllMenuItems();
 
     if (toCheckDuplicates.some((pack: any) => pack.category_type === category_type)) {
@@ -128,12 +136,11 @@ export class CreatePackageService {
         };
       });
 
-      const ourCommission = 2000;
       // Calculate the total price from itm_qty_price
-      const totalPrice = ourCommission + itemForMenuData.reduce((sum, item) => sum + item.itm_qty_price, 0);
+      const totalPrice: number = Number(process.env.COMMISSION) + itemForMenuData.reduce((sum, item) => sum + item.itm_qty_price, 0);
 
       // Create MenuItem using created ItemForMenu records and calculated total price
-      const createMenu = this.prisma.menu.create(
+      const createMenu = await this.prisma.menu.create(
         {
           data: {
             name,
@@ -180,7 +187,6 @@ export class CreatePackageService {
       const itemForMenuData: ItemListQty[] = await this.createOrUpdateItemForMenu(existingMenuItem.items, items, itemListData);
       // Calculate the total price from itm_qty_price
       const totalPrice: number = Number(process.env.COMMISSION) + itemForMenuData.reduce((sum, item) => sum + item.itm_qty_price, 0);
-
       // Update existing items with updateMany
       await this.prisma.$transaction(async (txn) => {
         await Promise.all(itemForMenuData.map(async (item: ItemListQty) => {
@@ -237,42 +243,39 @@ export class CreatePackageService {
     }
   }
 
-//
-// async deleteMenuItem(id: number) {
-//   const existingMenuItem = await this.prisma.menuItem.findUnique({
-//     where: { id },
-//     include: { items: true },
-//   });
-//
-//   if (!existingMenuItem) {
-//     throw new NotFoundException(`Menu Item with ID ${id} not found.`);
-//   }
-//
-//   // Delete associated items first
-//   await this.prisma.itemForMenu.deleteMany({
-//     where: { menu_item_id: id },
-//   });
-//   if (existingMenuItem.items) {
-//     await this.prisma.itemForMenu.deleteMany({
-//       where: { menu_item_id: id },
-//     });
-//   }
-//
-//   // Now, delete the menu item
-//   const deletedMenuItem = await this.prisma.menuItem.delete({
-//     where: { id },
-//   });
-//
-//   if (!deletedMenuItem) {
-//     throw new InternalServerErrorException('Unable to delete the menu item.');
-//   }
-//
-//   return {
-//     message: 'Menu Item has been deleted successfully!',
-//   };
-// }
+  async deleteMenuItem(id: number) {
+    const existingMenuItem = await this.prisma.menu.findUnique({
+      where: { id },
+      include: { items: true },
+    });
 
-  // Utility Functions/Methods
+    if (!existingMenuItem) {
+      throw new NotFoundException(`Menu Item with ID ${id} not found.`);
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      // Delete associated items first
+      if (existingMenuItem.items) {
+        const deletedItemForMenu = await this.prisma.itemForMenu.deleteMany({
+          where: { menu_id: id },
+        });
+      }
+      // Now, delete the menu item
+      const deletedMenuItem: Menu = await this.prisma.menu.delete({
+        where: { id },
+      });
+      if (!deletedMenuItem) {
+        throw new InternalServerErrorException('Unable to delete the menu item.');
+      }
+    });
+
+    return {
+      message: 'Menu Item has been deleted successfully!',
+    };
+  }
+
+
+  // # Utility Functions/Methods ------------------------ //
 
   async fetchItemsByIdList(items: ItemDto[]) {
     const itemListData: ItemList[] = await this.prisma.itemList.findMany({
