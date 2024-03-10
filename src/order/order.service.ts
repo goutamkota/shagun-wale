@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { OrderDto } from "./dtos/orderDto.dto";
-import { AppService } from "../app.service";
 import { CategoryType, Order } from "@prisma/client";
 import * as process from "process";
 import { CreatePackageService } from "../menu/create-package/create-package.service";
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class OrderService {
@@ -16,7 +16,7 @@ export class OrderService {
     ]
   );
 
-  constructor(private readonly prisma: AppService, private packageService: CreatePackageService) {
+  constructor(private readonly prisma: PrismaService, private packageService: CreatePackageService) {
   }
 
   async getAllOrders() {

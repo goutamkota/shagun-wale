@@ -5,19 +5,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AppService } from '../../app.service';
 import { CategoryType, ItemList, Menu } from '@prisma/client';
 import { CreateMenuDto, ItemDto, UpdateMenuDto } from '../dtos/menuItems.dto';
 import * as process from 'process';
-
-export interface ItemListQty extends ItemDto {
-  itm_qty_price: number;
-}
+import { ItemListQty, MenuService } from '../menu.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class CreatePackageService {
 
-  constructor(private readonly prisma: AppService) {
+  constructor(private readonly prisma: PrismaService, private menuService: MenuService) {
   }
 
   async getWholeMenu() {
@@ -28,9 +25,7 @@ export class CreatePackageService {
         },
       });
 
-      if (!allMenus || allMenus.length === 0) {
-        return new NotFoundException('No menus found.');
-      }
+      if (!allMenus || allMenus.length === 0) return new NotFoundException('No menus found.');
 
       return await Promise.all(allMenus.map(async (menu) => {
         const itemIds: number[] = menu.items.map((itemForMenu) => itemForMenu.item_id);
@@ -116,7 +111,7 @@ export class CreatePackageService {
 
     if (category_type === CategoryType.CUSTOM) throw new UnauthorizedException('Custom Packages are allowed to build by customers only!');
 
-    const toCheckDuplicates = await this.getAllMenuItems();
+    const toCheckDuplicates = await this.menuService.getAllMenuItems();
 
     if (toCheckDuplicates.some((pack: any) => pack.category_type === category_type)) {
       throw new ConflictException(`Package with category type - '${category_type}' already exists.`);
@@ -124,7 +119,7 @@ export class CreatePackageService {
 
     try {
       // Fetch ItemList data based on item_ids
-      const itemListData = await this.fetchItemsByIdList(items);
+      const itemListData = await this.menuService.fetchItemsByIdList(items);
 
       // Create ItemForMenu records
       const itemForMenuData: ItemListQty[] = items.map((item: ItemDto) => {
@@ -182,9 +177,9 @@ export class CreatePackageService {
         return new NotFoundException(`Menu Item with ID ${id} not found.`);
       }
       // Fetch ItemList data based on item_ids
-      const itemListData: ItemList[] = await this.fetchItemsByIdList(items);
+      const itemListData: ItemList[] = await this.menuService.fetchItemsByIdList(items);
       // Create ItemForMenu records
-      const itemForMenuData: ItemListQty[] = await this.createOrUpdateItemForMenu(existingMenuItem.items, items, itemListData);
+      const itemForMenuData: ItemListQty[] = await this.menuService.createOrUpdateItemForMenu(existingMenuItem.items, items, itemListData);
       // Calculate the total price from itm_qty_price
       const totalPrice: number = Number(process.env.COMMISSION) + itemForMenuData.reduce((sum, item) => sum + item.itm_qty_price, 0);
       // Update existing items with updateMany
@@ -243,7 +238,7 @@ export class CreatePackageService {
     }
   }
 
-  async deleteMenuItem(id: number) {
+  async deleteMenu(id: number) {
     const existingMenuItem = await this.prisma.menu.findUnique({
       where: { id },
       include: { items: true },
@@ -272,54 +267,6 @@ export class CreatePackageService {
     return {
       message: 'Menu Item has been deleted successfully!',
     };
-  }
-
-
-  // # Utility Functions/Methods ------------------------ //
-
-  async fetchItemsByIdList(items: ItemDto[]) {
-    const itemListData: ItemList[] = await this.prisma.itemList.findMany({
-      where: {
-        id: { in: items.map((item: ItemDto) => item.item_id) },
-      },
-    });
-    if (!itemListData) throw new NotFoundException('Error in fetching items through list of ids!');
-    return itemListData;
-  }
-
-  async createOrUpdateItemForMenu(existingItems: ItemListQty[], newItems: ItemDto[], itemListData: ItemList[]): Promise<ItemListQty[]> {
-    const itemForMenuData: ItemListQty[] = [];
-
-    newItems.forEach((item) => {
-      const itemListRecord = itemListData.find((i) => i.id === item.item_id);
-      const existingItem = existingItems.find((ei) => ei.item_id === item.item_id);
-
-      if (existingItem) {
-        // Update existing item
-        itemForMenuData.push({
-          item_id: item.item_id,
-          quantity: item.quantity,
-          itm_qty_price: item.quantity * (itemListRecord?.item_price || 0),
-        });
-      } else {
-        // Create new item
-        itemForMenuData.push({
-          item_id: item.item_id,
-          quantity: item.quantity,
-          itm_qty_price: item.quantity * (itemListRecord?.item_price || 0),
-        });
-      }
-    });
-
-    return itemForMenuData;
-  }
-
-  async getAllMenuItems() {
-    return this.prisma.menu.findMany({
-      include: {
-        items: true,
-      },
-    });
   }
 
 }

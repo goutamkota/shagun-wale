@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { CreateUserDto } from "./dtos/createUser.dto";
-import { AppService } from "../app.service";
 import { SignInDto } from "./dtos/signInCredentials.dto";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import * as process from "process";
 import { User } from "@prisma/client";
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface JWT_PAYLOAD {
   email: string;
@@ -16,7 +16,7 @@ export interface JWT_PAYLOAD {
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: AppService) {
+  constructor(private prisma: PrismaService) {
   }
 
   async signUp(data: CreateUserDto): Promise<any> {

@@ -1,12 +1,12 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ItemList } from "@prisma/client";
-import { AppService } from "../../app.service";
 import { UploadItemDto } from "../dtos/uploadItem.dto";
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class UploadItemService {
 
-  constructor(private prisma: AppService) {
+  constructor(private prisma: PrismaService) {
   }
 
   async showItemList() {

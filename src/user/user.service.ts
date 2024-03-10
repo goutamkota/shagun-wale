@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { AppService } from "../app.service";
 import * as bcrypt from "bcrypt";
 import * as process from "process";
 import { User } from "@prisma/client";
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
 
-  constructor(private prisma: AppService) {
+  constructor(private prisma: PrismaService) {
   }
 
   async removeUser(id: string) {
