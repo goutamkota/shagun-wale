@@ -37,9 +37,7 @@ export class OrderService {
       }
     });
 
-    if (!order) {
-      throw new NotFoundException("Order not found");
-    }
+    if (!order) throw new NotFoundException('Order not found');
 
     return order;
   }
@@ -54,17 +52,13 @@ export class OrderService {
       }
     });
 
-    if (!menuItem) {
-      throw new NotFoundException(`Item with id ${item_id} not found.`);
-    }
+    if (!menuItem) throw new NotFoundException(`Item with id ${item_id} not found.`);
 
-    const category = menuItem.category_type;
+    const total: number = quantity ? (menuItem.price * quantity) : menuItem.price;
 
-    const total = this.calculateTotal(category, quantity);
+    const discount: number = Number(process.env.PRODUCT_DISCOUNT);
 
-    const discount = Number(process.env.PRODUCT_DISCOUNT);
-
-    const grand_total = this.applyDiscount(total, discount);
+    const grand_total: number = this.applyDiscount(total, discount);
 
     const order = await this.prisma.order.create({
       data: {
@@ -74,49 +68,45 @@ export class OrderService {
         discount,
         grand_total,
         user: {
-          connect: { id: user_id }
+          connect: { id: user_id },
         },
         item: {
-          connect: { id: item_id }
-        }
+          connect: { id: item_id },
+        },
       },
       include: {
         user: true,
-        item: true
-      }
+        item: true,
+      },
     });
 
-    if (!order) throw new InternalServerErrorException("Unable to place the order!");
-    return {
-      message: "Order placed successfully!`"
-    };
+    if (!order) throw new InternalServerErrorException('Unable to place the order!');
+    return { message: 'Order placed successfully!`' };
   }
 
   async deleteOrder(id: number) {
     const existingOrder = await this.prisma.order.findUnique({
-      where: { id }
+      where: { id },
     });
 
-    if (!existingOrder) {
-      throw new NotFoundException("Order not found");
-    }
+    if (!existingOrder) throw new NotFoundException('Order not found');
 
     return this.prisma.order.delete({
       where: { id },
       include: {
         user: true,
-        item: true
-      }
+        item: true,
+      },
     });
   }
 
-  calculateTotal(category: CategoryType, quantity: number): number {
-    const cost = this.costCategoryMapped.get(category);
-    if (cost === undefined) {
-      throw new NotFoundException(`Cost for category ${category} not found.`);
-    }
-    return cost * quantity;
-  }
+  // calculateTotal(category: CategoryType, quantity: number): number {
+  //   const cost = this.costCategoryMapped.get(category);
+  //   if (cost === undefined) {
+  //     throw new NotFoundException(`Cost for category ${category} not found.`);
+  //   }
+  //   return cost * quantity;
+  // }
 
   applyDiscount(total: number, discount: number): number {
     return total - (total * discount) / 100;
