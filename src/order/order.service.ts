@@ -2,8 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { OrderDto } from "./dtos/orderDto.dto";
 import { CategoryType, Order } from "@prisma/client";
 import * as process from "process";
-import { CreatePackageService } from "../menu/create-package/create-package.service";
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class OrderService {
@@ -16,14 +15,14 @@ export class OrderService {
     ]
   );
 
-  constructor(private readonly prisma: PrismaService, private packageService: CreatePackageService) {
+  constructor(private readonly prisma: PrismaService) {
   }
 
   async getAllOrders() {
     return this.prisma.order.findMany({
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
   }
@@ -33,7 +32,7 @@ export class OrderService {
       where: { id },
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
 
@@ -45,30 +44,31 @@ export class OrderService {
   }
 
   async createOrder(orderDto: OrderDto) {
-    const { user_id, item_id, quantity, ...rest } = orderDto;
-    // const menuItem = await this.menuService.getMenuItem(orderDto.item_id);
-    const menuItem = await this.prisma.menu.findFirst({
-      where: { id: item_id },
+
+    const { user_id, menu_id, quantity,  payment_method, customer_notes, paid } = orderDto;
+    const tracking_number: string = "screwjack-ei-uhbcnjc2n";
+
+    const menu = await this.prisma.menu.findFirst({
+      where: { id: menu_id } ,
       include: {
         items: true
       }
     });
 
-    if (!menuItem) {
-      throw new NotFoundException(`Item with id ${item_id} not found.`);
-    }
+    console.log(menu);
 
-    const category = menuItem.category_type;
+    if (!menu) throw new NotFoundException(`Item with id ${menu_id} not found.`);
 
-    const total = this.calculateTotal(category, quantity);
+    const category: CategoryType = menu.category_type;
 
-    const discount = Number(process.env.PRODUCT_DISCOUNT);
+    const total: number = this.calculateTotal(category, quantity);
 
-    const grand_total = this.applyDiscount(total, discount);
+    const discount: number = Number(process.env.PRODUCT_DISCOUNT);
+
+    const grand_total: number = this.applyDiscount(total, discount);
 
     const order = await this.prisma.order.create({
       data: {
-        ...rest,
         quantity,
         total,
         discount,
@@ -76,20 +76,24 @@ export class OrderService {
         user: {
           connect: { id: user_id }
         },
-        item: {
-          connect: { id: item_id }
-        }
+        menu: {
+          connect: { id: menu_id }
+        },
+        payment_method,
+        customer_notes,
+        tracking_number,
+        paid
       },
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
 
     if (!order) throw new InternalServerErrorException("Unable to place the order!");
-    return {
-      message: "Order placed successfully!`"
-    };
+
+    return { message: "Order placed successfully!`" };
+
   }
 
   async deleteOrder(id: number) {
@@ -105,20 +109,20 @@ export class OrderService {
       where: { id },
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
   }
 
   calculateTotal(category: CategoryType, quantity: number): number {
     const cost = this.costCategoryMapped.get(category);
-    if (cost === undefined) {
-      throw new NotFoundException(`Cost for category ${category} not found.`);
-    }
+    if (cost === undefined) throw new NotFoundException(`Cost for category ${category} not found.`);
+    if (quantity === undefined) return cost;
     return cost * quantity;
   }
 
   applyDiscount(total: number, discount: number): number {
     return total - (total * discount) / 100;
   }
+
 }
