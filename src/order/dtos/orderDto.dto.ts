@@ -26,9 +26,13 @@ export class OrderDto {
   @IsString()
   tracking_number?: string
 
+  @IsString()
+  shipping_address: string
+
   @IsOptional()
   @IsBoolean()
   paid: boolean
+
 }
 
 export class CustomOrderDto {
