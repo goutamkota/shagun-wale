@@ -31,19 +31,19 @@ enum CategoryType {
 }
 
 model Order {
-  id               Int         @id @default(autoincrement())
-  quantity         Int?        @default(1)
+  id               Int          @id @default(autoincrement())
+  quantity         Int?         @default(1)
   total            Float
-  discount         Float
+  discount         Float?
   grand_total      Float
-  paid             Boolean     @default(false)
-  status           OrderStatus @default(PENDING)
-  createDate       DateTime    @default(now())
-  updateDate       DateTime    @updatedAt()
+  paid             Boolean?     @default(false)
+  status           OrderStatus? @default(PENDING)
+  createDate       DateTime     @default(now())
+  updateDate       DateTime     @updatedAt()
   user_id          String
-  user             User        @relation(fields: [user_id], references: [id])
-  item_id          Int
-  item             Menu        @relation(fields: [item_id], references: [id])
+  user             User         @relation(fields: [user_id], references: [id])
+  menu_id          Int
+  menu             Menu         @relation(fields: [menu_id], references: [id])
   shipping_address String?
   tracking_number  String?
   customer_notes   String?
@@ -69,19 +69,19 @@ model ItemForMenu {
 }
 
 model CustomOrder {
-  id               Int         @id @default(autoincrement())
-  quantity         Int?        @default(1)
+  id               Int          @id @default(autoincrement())
+  quantity         Int?         @default(1)
   total            Float
   discount         Float
   grand_total      Float
-  paid             Boolean
-  status           OrderStatus @default(PENDING)
-  createDate       DateTime    @default(now())
-  updateDate       DateTime    @updatedAt()
+  paid             Boolean?
+  status           OrderStatus? @default(PENDING)
+  createDate       DateTime     @default(now())
+  updateDate       DateTime     @updatedAt()
   user_id          String
-  user             User        @relation(fields: [user_id], references: [id])
-  custom_item_id   Int
-  custom_item      CustomMenu  @relation(fields: [custom_item_id], references: [id])
+  user             User         @relation(fields: [user_id], references: [id])
+  custom_menu_id   Int
+  custom_menu      CustomMenu   @relation(fields: [custom_menu_id], references: [id])
   shipping_address String?
   tracking_number  String?
   customer_notes   String?

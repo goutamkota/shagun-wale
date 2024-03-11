@@ -2,8 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { OrderDto } from "./dtos/orderDto.dto";
 import { CategoryType, Order } from "@prisma/client";
 import * as process from "process";
-import { CreatePackageService } from "../menu/create-package/create-package.service";
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class OrderService {
@@ -16,14 +15,14 @@ export class OrderService {
     ]
   );
 
-  constructor(private readonly prisma: PrismaService, private packageService: CreatePackageService) {
+  constructor(private readonly prisma: PrismaService) {
   }
 
   async getAllOrders() {
     return this.prisma.order.findMany({
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
   }
@@ -33,28 +32,36 @@ export class OrderService {
       where: { id },
       include: {
         user: true,
-        item: true
+        menu: true
       }
     });
 
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order) {
+      throw new NotFoundException("Order not found");
+    }
 
     return order;
   }
 
   async createOrder(orderDto: OrderDto) {
-    const { user_id, item_id, quantity, ...rest } = orderDto;
-    // const menuItem = await this.menuService.getMenuItem(orderDto.item_id);
-    const menuItem = await this.prisma.menu.findFirst({
-      where: { id: item_id },
+
+    const { user_id, menu_id, quantity,  payment_method, customer_notes, paid } = orderDto;
+    const tracking_number: string = "screwjack-ei-uhbcnjc2n";
+
+    const menu = await this.prisma.menu.findFirst({
+      where: { id: menu_id } ,
       include: {
         items: true
       }
     });
 
-    if (!menuItem) throw new NotFoundException(`Item with id ${item_id} not found.`);
+    console.log(menu);
 
-    const total: number = quantity ? (menuItem.price * quantity) : menuItem.price;
+    if (!menu) throw new NotFoundException(`Item with id ${menu_id} not found.`);
+
+    const category: CategoryType = menu.category_type;
+
+    const total: number = this.calculateTotal(category, quantity);
 
     const discount: number = Number(process.env.PRODUCT_DISCOUNT);
 
@@ -62,53 +69,60 @@ export class OrderService {
 
     const order = await this.prisma.order.create({
       data: {
-        ...rest,
         quantity,
         total,
         discount,
         grand_total,
         user: {
-          connect: { id: user_id },
+          connect: { id: user_id }
         },
-        item: {
-          connect: { id: item_id },
+        menu: {
+          connect: { id: menu_id }
         },
+        payment_method,
+        customer_notes,
+        tracking_number,
+        paid
       },
       include: {
         user: true,
-        item: true,
-      },
+        menu: true
+      }
     });
 
-    if (!order) throw new InternalServerErrorException('Unable to place the order!');
-    return { message: 'Order placed successfully!`' };
+    if (!order) throw new InternalServerErrorException("Unable to place the order!");
+
+    return { message: "Order placed successfully!`" };
+
   }
 
   async deleteOrder(id: number) {
     const existingOrder = await this.prisma.order.findUnique({
-      where: { id },
+      where: { id }
     });
 
-    if (!existingOrder) throw new NotFoundException('Order not found');
+    if (!existingOrder) {
+      throw new NotFoundException("Order not found");
+    }
 
     return this.prisma.order.delete({
       where: { id },
       include: {
         user: true,
-        item: true,
-      },
+        menu: true
+      }
     });
   }
 
-  // calculateTotal(category: CategoryType, quantity: number): number {
-  //   const cost = this.costCategoryMapped.get(category);
-  //   if (cost === undefined) {
-  //     throw new NotFoundException(`Cost for category ${category} not found.`);
-  //   }
-  //   return cost * quantity;
-  // }
+  calculateTotal(category: CategoryType, quantity: number): number {
+    const cost = this.costCategoryMapped.get(category);
+    if (cost === undefined) throw new NotFoundException(`Cost for category ${category} not found.`);
+    if (quantity === undefined) return cost;
+    return cost * quantity;
+  }
 
   applyDiscount(total: number, discount: number): number {
     return total - (total * discount) / 100;
   }
+
 }
