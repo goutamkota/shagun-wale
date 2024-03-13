@@ -1,6 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { OrderService } from './order.service';
-import { OrderDto } from './dtos/orderDto.dto';
+import { OrderDto, UpdateOrder } from "./dtos/orderDto.dto";
 import { isNumber } from '@nestjs/common/utils/shared.utils';
 
 @Controller('order')
@@ -23,8 +23,8 @@ export class OrderController {
     return this.orderService.createOrder(orderDto);
   }
 
-  @Post('/updateOrder/:id')
-  updateOrder(@Param('id') id: string, @Body() orderDto: Partial<OrderDto & { idMenuChange: number }>) {
+  @Patch('/updateOrder/:id')
+  updateOrder(@Param('id') id: string, @Body() orderDto: Partial<UpdateOrder>) {
     if (!isNumber(Number(id))) throw new BadRequestException('Please provide number as param!');
     return this.orderService.updateOrder(Number(id), orderDto);
   }

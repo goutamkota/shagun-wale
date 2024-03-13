@@ -16,7 +16,7 @@ export class OrderDto {
 
   @IsOptional()
   @IsEnum(Payment)
-  payment_method?: Payment
+  payment_method?: Payment;
 
   @IsOptional()
   @IsString()
@@ -24,14 +24,22 @@ export class OrderDto {
 
   @IsOptional()
   @IsString()
-  tracking_number?: string
+  tracking_number?: string;
 
   @IsString()
-  shipping_address: string
+  shipping_address: string;
 
   @IsOptional()
   @IsBoolean()
-  paid: boolean
+  paid: boolean;
+
+}
+
+export class UpdateOrder extends OrderDto {
+
+  @IsOptional()
+  @IsNumber()
+  menu_id_change: number;
 
 }
 
