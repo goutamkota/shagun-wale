@@ -1,0 +1,40 @@
+P1001 - ConnectionError:
+
+Description: Unable to establish a connection to the database.
+Possible Causes: Incorrect database URL, network issues, or database server down.
+P1002 - TimeoutError:
+
+Description: The operation timed out while waiting for a response from the database.
+Possible Causes: Heavy database load, slow network connection, or long-running database queries.
+P1003 - QueryError:
+
+Description: An error occurred while executing a database query.
+Possible Causes: Invalid SQL syntax, database constraints violation, or data integrity issues.
+P1004 - NotFoundError:
+
+Description: The requested resource was not found in the database.
+Possible Causes: Querying for a non-existent record, incorrect identifiers, or deleted data.
+P1005 - ValidationError:
+
+Description: Input data validation failed.
+Possible Causes: Invalid input data format, missing required fields, or data type mismatches.
+P1006 - UniqueConstraintViolationError:
+
+Description: Attempted to insert or update data violating a unique constraint.
+Possible Causes: Duplicate entry for a unique column, conflicting data insertion, or concurrent operations.
+P1007 - ForeignKeyConstraintViolationError:
+
+Description: Foreign key constraint violation occurred.
+Possible Causes: Referenced record does not exist, or attempting to delete a record with dependent records.
+P1008 - ConfigurationError:
+
+Description: Configuration-related error, such as missing or invalid configuration options.
+Possible Causes: Incorrect configuration settings, missing environment variables, or incompatible configurations.
+P1009 - SerializationFailureError:
+
+Description: Failed to serialize or deserialize data.
+Possible Causes: Serialization format mismatch, unsupported data types, or corrupted data.
+P1010 - AuthorizationError:
+
+Description: User does not have permission to perform the requested operation.
+Possible Causes: Insufficient privileges, unauthorized access attempt, or access control restrictions.

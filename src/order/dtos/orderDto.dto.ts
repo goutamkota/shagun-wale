@@ -31,7 +31,7 @@ export class OrderDto {
 
   @IsOptional()
   @IsBoolean()
-  paid: boolean;
+  paid?: boolean;
 
 }
 

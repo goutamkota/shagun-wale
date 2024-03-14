@@ -1,8 +1,14 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from "@nestjs/common";
 import { OrderDto, UpdateOrder } from "./dtos/orderDto.dto";
 import { Menu, Order } from "@prisma/client";
 import * as process from "process";
 import { PrismaService } from "../prisma/prisma.service";
+import { Errors } from "../errors";
 
 @Injectable()
 export class OrderService {
@@ -134,19 +140,14 @@ export class OrderService {
 
 
   async deleteOrder(id: number) {
-    const existingOrder = await this.prisma.order.findUnique({
-      where: { id }
-    });
-
-    if (!existingOrder) throw new NotFoundException("Order not found");
-
-    return this.prisma.order.delete({
-      where: { id },
-      include: {
-        user: true,
-        menu: true
-      }
-    });
+    try {
+      await this.prisma.order.delete({
+        where: { id }
+      });
+      return { message: "Order has been deleted!" };
+    } catch (error) {
+      throw new InternalServerErrorException(Errors[error.code]);
+    }
   }
 
 }
