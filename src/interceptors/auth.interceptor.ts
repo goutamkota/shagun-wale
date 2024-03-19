@@ -7,10 +7,10 @@ import { DecodedJWT } from "../guards/auth.guard";
 export class AuthInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const token = request?.headers?.authorization?.split("Bearer ")[1];
+    const token = request?.headers['authorization']?.split("Bearer ")[1];
+    if(!token) throw new UnauthorizedException('Token Not Found!')
     try {
       const payload: DecodedJWT = jwt.verify(token, process.env.JWT_SECRET) as DecodedJWT;
-      console.log(payload, "payload interceptor");
       if (payload) request.user = payload;
     } catch (error) {
       throw new UnauthorizedException();

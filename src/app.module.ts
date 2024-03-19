@@ -16,6 +16,10 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthInterceptor
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
     }
   ]
 })

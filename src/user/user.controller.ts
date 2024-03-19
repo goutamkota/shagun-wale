@@ -1,15 +1,12 @@
-import { Controller, Delete, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Param, Query } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { AuthGuard } from "../guards/auth.guard";
 import { AllowAdmin } from "../decorators/allowAdmin.decorator";
 
-@AllowAdmin()
+// @AllowAdmin()
 @Controller("user")
-@UseGuards(AuthGuard)
 export class UserController {
 
-  constructor(private userService: UserService) {
-  }
+  constructor(private userService: UserService) {}
 
   @Delete(":id")
   removeUser(@Param("id") id: string) {
@@ -28,4 +25,5 @@ export class UserController {
   fetchUserList(@Query("id") id?: string) {
     return this.userService.fetchUserList(id);
   }
+
 }
