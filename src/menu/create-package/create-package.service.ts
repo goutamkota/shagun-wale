@@ -133,7 +133,6 @@ export class CreatePackageService {
 
       // Calculate the total price from itm_qty_price
       const totalPrice: number = Number(process.env.COMMISSION) + itemForMenuData.reduce((sum, item) => sum + item.itm_qty_price, 0);
-      console.log(totalPrice);
       // Create MenuItem using created ItemForMenu records and calculated total price
       const createMenu = await this.prisma.menu.create(
         {

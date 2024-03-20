@@ -17,7 +17,8 @@ export class AuthGuard implements CanActivate {
   constructor(
     private prisma: PrismaService,
     private readonly reflector: Reflector
-  ) {}
+  ) {
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const allowAdmin = this.reflector.getAllAndOverride<boolean>("allowAdmin", [
@@ -27,18 +28,21 @@ export class AuthGuard implements CanActivate {
     return this.verifyTokenAndUser(context, allowAdmin);
   }
 
+  // route: Route {
+  // path: '/auth/signup',
+
 
   private async verifyTokenAndUser(context: ExecutionContext, forAdmin: boolean): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request?.headers['authorization']?.split("Bearer ")[1];
-    if (!token) return false;
+    const token = request?.headers["authorization"]?.split("Bearer ")[1];
+    if (!token) return request.route.path.includes("auth");
 
     try {
-      const { id }  = jwt.verify(token, process.env.JWT_SECRET) as DecodedJWT;
+      const { id } = jwt.verify(token, process.env.JWT_SECRET) as DecodedJWT;
       const user: User = await this.prisma.user.findUnique(
         {
-        where: { id }
-      }
+          where: { id }
+        }
       );
       if (forAdmin && (!user || !user.isAdmin)) return false;
       if (!user) return false;
